@@ -1,0 +1,13 @@
+name: fraud_detection
+
+conda_env: conda_env.yaml
+
+entry_points:
+  download_data:
+    command: "python download_data.py"
+  
+  preprocess_data:
+    command: "python preprocess_data.py"
+
+  main:
+    command: "python main.py"
