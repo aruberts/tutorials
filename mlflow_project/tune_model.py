@@ -70,8 +70,6 @@ def tune_model(parent_run, train_path, val_path, n_trials):
         experiment = client.create_experiment(experiment_name)
     except:
         experiment = client.get_experiment_by_name(experiment_name).experiment_id
-    
-    print(f"Experiment {experiment}")
 
     train_dataset = read_cb_data(
         train_path, 
@@ -95,7 +93,6 @@ def tune_model(parent_run, train_path, val_path, n_trials):
                     MLFLOW_PARENT_RUN_ID: parent_run_id
                 }
             )
-            print("Trial run info run id:", trial_run.info.run_id)
             param = {
                 "n_estimators": 1000,
                 "objective": "Logloss",
@@ -124,7 +121,6 @@ def tune_model(parent_run, train_path, val_path, n_trials):
         return objective
 
     with mlflow.start_run(run_name='hp_tuning') as active_run:
-        print("Active run:", active_run)
         study = optuna.create_study(direction="maximize")
         study.optimize(get_objective(active_run.info.run_id), n_trials=n_trials)
         # Log all tuned params
