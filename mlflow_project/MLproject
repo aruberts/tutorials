@@ -8,6 +8,9 @@ entry_points:
   
   preprocess_data:
     command: "python preprocess_data.py"
+  
+  tune_model:
+    command: "python tune_model.py"
 
   main:
     command: "python main.py"

@@ -9,3 +9,7 @@ dependencies:
       - mlflow>=2.1
       - kaggle
       - polars
+      - catboost
+      - optuna
+      - pandas
+      - sklearn
