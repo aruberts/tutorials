@@ -11,7 +11,7 @@ import mlflow
 )
 @click.option("--dset-name", default="sgpjesus/bank-account-fraud-dataset-neurips-2022")
 def load_raw_data(dset_name):
-    with mlflow.start_run() as mlrun:
+    with mlflow.start_run(run_name='download_data') as mlrun:
         zip_destination_folder = "./data/"
         raw_destination_folder = os.path.join(zip_destination_folder, "raw")
 

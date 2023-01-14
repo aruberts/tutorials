@@ -72,7 +72,7 @@ def train_val_test_split(df, test_size=0.2, val_size=0.2):
 @click.option("--dset-path")
 @click.option("--missing-thr", default=0.95)
 def preprocess_data(dset_path, missing_thr):
-    with mlflow.start_run() as mlrun:
+    with mlflow.start_run(run_name='preprocess_data') as mlrun:
         df = pl.read_csv(dset_path)
         # Preprocess nulls
         df = process_nans(df, missing_thr)

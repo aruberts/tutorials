@@ -123,7 +123,7 @@ def tune_model(parent_run, train_path, val_path, n_trials):
     
         return objective
 
-    with mlflow.start_run() as active_run:
+    with mlflow.start_run(run_name='hp_tuning') as active_run:
         print("Active run:", active_run)
         study = optuna.create_study(direction="maximize")
         study.optimize(get_objective(active_run.info.run_id), n_trials=n_trials)
