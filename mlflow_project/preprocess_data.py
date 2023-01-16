@@ -91,7 +91,7 @@ def preprocess_data(dset_path, missing_thr):
 
         file_locations = {
             'train-data-dir': './data/processed/train.parquet',
-            'val-data-dir': './data/processed/val.parquet',
+            'val-data-dir': './data/processed/validation.parquet',
             'test-data-dir': './data/processed/test.parquet',
         }
         

@@ -23,7 +23,7 @@ def load_raw_data(dset_name):
 
         # Download the dataset into a current folder
         kaggle.api.dataset_download_files(
-            "sgpjesus/bank-account-fraud-dataset-neurips-2022",
+            dset_name,
             path=zip_destination_folder,
         )
 
