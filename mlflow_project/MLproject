@@ -3,14 +3,8 @@ name: fraud_detection
 conda_env: conda_env.yaml
 
 entry_points:
-  download_data:
-    command: "python download_data.py"
-  
-  preprocess_data:
-    command: "python preprocess_data.py"
-  
-  tune_model:
-    command: "python tune_model.py"
-
   main:
-    command: "python main.py"
+    parameters:
+      dset: {type: str, default: sgpjesus/bank-account-fraud-dataset-neurips-2022}
+      n_trials: {type: int, default: 10}
+    command: "python main.py {dset} {n_trials}"

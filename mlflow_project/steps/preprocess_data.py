@@ -1,7 +1,4 @@
 import os
-
-import click
-import mlflow
 import polars as pl
 
 
@@ -63,40 +60,27 @@ def train_val_test_split(df, test_size=0.2, val_size=0.2):
 
     return df_train, df_val, df_test
 
-
-
-@click.command(
-    help="""Given a path to raw csv file, this steps fills in missing data, 
-    drops static columns, and splits the data into train/val/test sets"""
-)
-@click.option("--dset-path")
-@click.option("--missing-thr", default=0.95)
 def preprocess_data(dset_path, missing_thr):
-    with mlflow.start_run(run_name='preprocess_data') as mlrun:
-        df = pl.read_csv(dset_path)
-        # Preprocess nulls
-        df = process_nans(df, missing_thr)
-        # Drop static
-        df = drop_static(df)
-        # Train/val/test split 
-        train_df, val_df, test_df = train_val_test_split(df)
-        # Save data
-        split_destination_folder = './data/processed'
-        if not os.path.exists(split_destination_folder):
-            os.makedirs(split_destination_folder)
+    df = pl.read_csv(dset_path)
+    # Preprocess nulls
+    df = process_nans(df, missing_thr)
+    # Drop static
+    df = drop_static(df)
+    # Train/val/test split 
+    train_df, val_df, test_df = train_val_test_split(df)
+    # Save data
+    split_destination_folder = './data/processed'
+    if not os.path.exists(split_destination_folder):
+        os.makedirs(split_destination_folder)
 
-        train_df.write_parquet('./data/processed/train.parquet')
-        val_df.write_parquet('./data/processed/validation.parquet')
-        test_df.write_parquet('./data/processed/test.parquet')
+    train_df.write_parquet('./data/processed/train.parquet')
+    val_df.write_parquet('./data/processed/validation.parquet')
+    test_df.write_parquet('./data/processed/test.parquet')
 
-        file_locations = {
-            'train-data-dir': './data/processed/train.parquet',
-            'val-data-dir': './data/processed/validation.parquet',
-            'test-data-dir': './data/processed/test.parquet',
-        }
-        
-        mlflow.log_params(file_locations)
+    file_locations = {
+        'train-data-dir': './data/processed/train.parquet',
+        'val-data-dir': './data/processed/validation.parquet',
+        'test-data-dir': './data/processed/test.parquet',
+    }
 
-
-if __name__ == "__main__":
-    preprocess_data()
+    return file_locations

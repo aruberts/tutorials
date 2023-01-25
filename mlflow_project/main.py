@@ -1,48 +1,49 @@
-import click
+import sys
 
 import mlflow
-from mlflow.tracking import MlflowClient
+from steps.download_data import load_raw_data
+from steps.preprocess_data import preprocess_data
+from steps.tune_model import tune_model
+from steps.train_final_model import train_model
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
-def run(entrypoint, parameters):
-    print(
-        "Launching new run for entrypoint={} and parameters={}".format(
-            entrypoint, parameters
-        )
+def pipeline():
+    mlflow.set_experiment("fraud")
+    tracking_uri = mlflow.get_tracking_uri()
+
+    file_location = load_raw_data(sys.argv[1])
+    print(f"{bcolors.OKCYAN}Data is loaded{bcolors.ENDC}")
+
+    file_dirs = preprocess_data(file_location, missing_thr=0.95)
+    print(f"{bcolors.OKCYAN}Data is preprocessed{bcolors.ENDC}")
+    best_params = tune_model(
+        tracking_uri=tracking_uri,
+        train_path=file_dirs["train-data-dir"],
+        val_path=file_dirs["val-data-dir"],
+        n_trials=int(sys.argv[2]),
     )
-    submitted_run = mlflow.run(
-        ".", entrypoint, parameters=parameters, env_manager="local"
+    print(f"{bcolors.OKCYAN}HP tuning is finished{bcolors.ENDC}")
+    best_params["n_estimators"] = 1000
+    best_params["objective"] = "Logloss"
+
+    roc, pr = train_model(
+        best_params,
+        train_path=file_dirs["train-data-dir"],
+        val_path=file_dirs["val-data-dir"],
+        test_path=file_dirs["test-data-dir"],
     )
-    return MlflowClient().get_run(submitted_run.run_id)
-
-
-@click.command()
-@click.option("--n-trials", default=10, type=int)
-def pipeline(n_trials):
-    # Note: The entrypoint names are defined in MLproject. The artifact directories
-    # are documented by each step's .py file.
-    with mlflow.start_run() as active_run:
-        # Run the download_data task
-        load_raw_data_run = run("download_data", {})
-        # Extract the raw data location
-        dset_path = load_raw_data_run.data.params["raw-data-dir"]
-        # Run the preprocess_data task
-        prep_data_run = run("preprocess_data", {"dset-path": dset_path})
-        # Extract the train/val/test data locations
-        train_path = prep_data_run.data.params["train-data-dir"]
-        val_path = prep_data_run.data.params["val-data-dir"]
-        test_path = prep_data_run.data.params["test-data-dir"]
-        # Do HP search
-        model_tuning_run = run(
-            "tune_model", {
-                "parent-run": active_run.info.run_id,
-                "train-path": train_path,
-                "val-path": val_path,
-                "n-trials": n_trials
-            }
-        )
-        print(model_tuning_run.data.metrics)
-        print(model_tuning_run.data.params)
+    print(f"{bcolors.OKGREEN}Final model is trained. \nTestset ROC AUC: {roc}\nTestset PR AUC: {pr}{bcolors.ENDC}")
 
 
 if __name__ == "__main__":
