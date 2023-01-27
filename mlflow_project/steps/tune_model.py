@@ -56,12 +56,7 @@ def read_cb_data(
     return dataset
 
 
-def tune_model(tracking_uri, train_path, val_path, n_trials):
-    mlflc = MLflowCallback(
-        tracking_uri=tracking_uri,
-        metric_name="my metric score",
-    )
-
+def tune_model(train_path, val_path, n_trials):
     train_dataset = read_cb_data(
         train_path,
         numeric_features=NUMERICAL_FEATURES,

@@ -20,15 +20,12 @@ class bcolors:
 
 def pipeline():
     mlflow.set_experiment("fraud")
-    tracking_uri = mlflow.get_tracking_uri()
-
     file_location = load_raw_data(sys.argv[1])
     print(f"{bcolors.OKCYAN}Data is loaded{bcolors.ENDC}")
 
     file_dirs = preprocess_data(file_location, missing_thr=0.95)
     print(f"{bcolors.OKCYAN}Data is preprocessed{bcolors.ENDC}")
     best_params = tune_model(
-        tracking_uri=tracking_uri,
         train_path=file_dirs["train-data-dir"],
         val_path=file_dirs["val-data-dir"],
         n_trials=int(sys.argv[2]),
