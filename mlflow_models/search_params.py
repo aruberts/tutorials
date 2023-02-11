@@ -7,11 +7,10 @@ results.
 This example currently does not support parallel execution.
 """
 
-from multiprocessing.sharedctypes import Value
 import click
 import numpy as np
 
-from hyperopt import fmin, hp, tpe, rand
+from hyperopt import fmin, hp, tpe
 from hyperopt.pyll import scope
 
 import mlflow.projects
@@ -39,27 +38,20 @@ def train(training_data, max_runs, model_type):
         """
         Create a new eval function
         :experiment_id: Experiment id for the training run
-        :valid_null_loss: Loss of a null model on the validation dataset
-        :test_null_loss: Loss of a null model on the test dataset.
-        :return_test_loss: Return both validation and test loss if set.
         :return: new eval function.
         """
 
         def eval(params):
             """
-            Train Keras model with given parameters by invoking MLflow run.
-            Notice we store runUuid and resulting metric in a file. We will later use these to pick
-            the best run and to log the runUuids of the child runs as an artifact. This is a
-            temporary workaround until MLflow offers better mechanism of linking runs together.
-            :param params: Parameters to the train_keras script we optimize over:
-                          learning_rate, drop_out_1
+            Train sklearn model with given parameters by invoking MLflow run.
+            :param params: Parameters to the train_keras script we optimize over
             :return: The metric value evaluated on the validation data.
             """
-            import mlflow.tracking
-
             with mlflow.start_run(nested=True) as child_run:
                 if model_type == "rf":
+                    # Params used to train RF
                     max_depth, max_features, class_weight, min_samples_leaf = params
+                    # Run the training script as MLflow sub-run
                     p = mlflow.projects.run(
                         uri=".",
                         entry_point="train_rf",
@@ -74,7 +66,9 @@ def train(training_data, max_runs, model_type):
                         experiment_id=experiment_id,
                         synchronous=False,  # Allow the run to fail if a model is not properly created
                     )
+                    # No idea why, but it's needed?
                     succeeded = p.wait()
+                    # Log params
                     mlflow.log_params(
                         {
                             "max_depth": max_depth,
@@ -84,7 +78,9 @@ def train(training_data, max_runs, model_type):
                         }
                     )
                 elif model_type == 'hgbt':
+                    # Params used to train HGBT
                     max_depth, max_leaf_nodes, class_weight, l2_regularization, learning_rate = params
+                    # Run the train_hgbt as sub-run
                     p = mlflow.projects.run(
                         uri=".",
                         entry_point="train_hgbt",
@@ -98,7 +94,7 @@ def train(training_data, max_runs, model_type):
                             "l2_regularization": str(l2_regularization),
                         },
                         experiment_id=experiment_id,
-                        synchronous=False,  # Allow the run to fail if a model is not properly created
+                        synchronous=False,
                     )
                     succeeded = p.wait()
                     mlflow.log_params(
@@ -110,12 +106,11 @@ def train(training_data, max_runs, model_type):
                             "l2_regularization": l2_regularization,
                         }
                     )
-
                     print(succeeded)
 
+            # Grab the test metrics from the MLflow run
             training_run = tracking_client.get_run(p.run_id)
             metrics = training_run.data.metrics
-            # cap the loss at the loss of the null model
             test_prauc = metrics["test_PR_AUC"]
 
             return -test_prauc
@@ -123,6 +118,7 @@ def train(training_data, max_runs, model_type):
         return eval
 
     if model_type == 'rf':
+        # Search space for RF
         space = [
             scope.int(hp.quniform("max_depth", 1, 30, q=1)),
             hp.uniform("max_features", 0.05, 0.8),
@@ -130,6 +126,7 @@ def train(training_data, max_runs, model_type):
             scope.int(hp.quniform("min_samples_leaf", 5, 100, q=5)),
         ]
     elif model_type ==  'hgbt':
+        # Search space for HGBT
         space = [
             scope.int(hp.quniform("max_depth", 1, 30, q=1)),
             scope.int(hp.quniform("max_leaf_nodes", 5, 100, q=5)),
@@ -140,9 +137,12 @@ def train(training_data, max_runs, model_type):
     else:
         raise ValueError(f"Model type {model_type} is not supported")
 
+    # This starts the actual search_rf.py experiment run
     with mlflow.start_run() as run:
+        # Get parent ID
         experiment_id = run.info.experiment_id
-
+        
+        # Optimisation function that takes parent id and search params as input
         best = fmin(
             fn=new_eval(experiment_id),
             space=space,
