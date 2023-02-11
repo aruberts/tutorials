@@ -1,0 +1,15 @@
+python: "3.9"
+build_dependencies:
+  - pip
+dependencies:
+  - numpy
+  - click
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - mlflow>=2.1
+  - hyperopt
+  - protobuf
+  - kaggle
+  - category-encoders
