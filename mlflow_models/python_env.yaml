@@ -2,14 +2,13 @@ python: "3.9"
 build_dependencies:
   - pip
 dependencies:
-  - numpy
-  - click
-  - pandas
-  - scipy
-  - scikit-learn
-  - matplotlib
+  - numpy>=1.21
+  - click>=8.0
+  - pandas>=1.5
+  - scipy>=1.7
+  - scikit-learn==1.2.1
   - mlflow>=2.1
-  - hyperopt
+  - hyperopt==0.2.7
   - protobuf
   - kaggle
-  - category-encoders
+  - category-encoders==2.3.0
