@@ -3,6 +3,14 @@ name: hp_search
 python_env: python_env.yaml
 
 entry_points:
+# Use Hyperopt to optimize hyperparams of the train entry_point.
+  search_params:
+    parameters:
+      training_data: {type: string, default: "sgpjesus/bank-account-fraud-dataset-neurips-2022"}
+      max_runs: {type: int, default: 10}
+      model_type: {type: str, default: "hgbt"}
+    command: "python -O search_params.py {training_data} --max-runs {max_runs} --model-type {model_type}"
+
   # train Random Forest model with default HPs
   train_rf:
     parameters:
@@ -32,10 +40,3 @@ entry_points:
                                     --class-weight {class_weight}
                                     --max-leaf-nodes {max_leaf_nodes}
                                     --l2-regularization {l2_regularization}"
-  # Use Hyperopt to optimize hyperparams of the train entry_point.
-  search_params:
-    parameters:
-      training_data: {type: string, default: "sgpjesus/bank-account-fraud-dataset-neurips-2022"}
-      max_runs: {type: int, default: 10}
-      model_type: {type: str, default: "hgbt"}
-    command: "python -O search_params.py {training_data} --max-runs {max_runs} --model-type {model_type}"
