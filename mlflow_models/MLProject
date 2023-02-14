@@ -6,7 +6,7 @@ entry_points:
 # Use Hyperopt to optimize hyperparams of the train entry_point.
   search_params:
     parameters:
-      training_data: {type: string, default: "sgpjesus/bank-account-fraud-dataset-neurips-2022"}
+      training_data: {type: string, default: "hemanthsai7/loandefault"}
       max_runs: {type: int, default: 10}
       model_type: {type: str, default: "hgbt"}
     command: "python -O search_params.py {training_data} --max-runs {max_runs} --model-type {model_type}"

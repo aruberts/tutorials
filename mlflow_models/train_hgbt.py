@@ -62,10 +62,10 @@ def run(
     """
     warnings.filterwarnings("ignore")
     # Read data
-    csv_loc = load_raw_data(dset_name, file_name="Base.csv")
+    csv_loc = load_raw_data(dset_name, file_name="train.csv")
     data = pd.read_csv(csv_loc)
 
-    # Transform categoricals into category type 
+    # Transform categoricals into category type
     data[CATEGORICAL_FEATURES] = data[CATEGORICAL_FEATURES].astype("category")
 
     # Train/test split
@@ -97,8 +97,10 @@ def run(
         )
         # Define transform
         transformer = ColumnTransformer(
-            transformers=[("categorical", OrdinalEncoder(), CATEGORICAL_FEATURES)], # HGBT still needs this
-            verbose_feature_names_out=False, # to not alter categorical names
+            transformers=[
+                ("categorical", OrdinalEncoder(), CATEGORICAL_FEATURES)
+            ],  # HGBT still needs this
+            verbose_feature_names_out=False,  # to not alter categorical names
             remainder="passthrough",
         )
         # Define pipeline
