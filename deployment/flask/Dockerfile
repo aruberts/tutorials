@@ -1,4 +1,4 @@
-# Start from a base image
+# Base image is Python 3.9
 FROM python:3.9-slim
 
 # Set the working directory
@@ -11,11 +11,8 @@ COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copy the application code into the container
+# Copy the model and application code into the container
 COPY ["loan_catboost_model.cbm", "app.py", "./"] .
 
-# Expose the Flask app port
-EXPOSE 8989
-
-# Specify the entrypoint of the app
+# Run the app using gunicorn
 ENTRYPOINT [ "gunicorn", "--bind=0.0.0.0:8989", "app:app" ]

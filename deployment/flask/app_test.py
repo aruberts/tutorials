@@ -51,7 +51,7 @@ class BankLoan(HttpUser):
     @task
     def predict(self):
         self.client.post(
-            "http://0.0.0.0:8989/predict",
+            "/predict",
             json=random.choice(test_applications),
             timeout=1,
         )
