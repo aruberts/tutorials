@@ -1,0 +1,7 @@
+numpy==1.23.5
+pandas==1.5.3
+polars==0.17.14
+nltk==3.8.1
+scikit-learn==1.2.2
+matplotlib==3.7.1
+wordcloud==1.9.2
