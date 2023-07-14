@@ -1,0 +1,28 @@
+data_path: "./youtube/GBvideos.csv"
+category_map_path: "./youtube/GB_category_id.json"
+
+# Pre-processing config
+date_column_format:
+  trending_date: "%y.%d.%m"
+  publish_time: "%Y-%m-%dT%H:%M:%S%.fZ"
+
+# Feature engineering config
+ratio_features:
+  likes_to_dislikes:
+    - likes
+    - dislikes
+  likes_to_views:
+    - likes
+    - views
+  comments_to_views:
+    - comment_count
+    - views
+
+difference_features:
+  days_to_trending:
+    - trending_date
+    - publish_time
+
+date_features:
+  trending_date:
+    - weekday
