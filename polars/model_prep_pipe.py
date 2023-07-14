@@ -67,5 +67,4 @@ def pipeline():
 
 
 if __name__ == "__main__":
-    data = pipeline()
-    data.write_parquet("./data/modelling_data.parquet")
+    pipeline().write_parquet("./data/modelling_data.parquet")
