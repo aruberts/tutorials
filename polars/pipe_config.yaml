@@ -26,3 +26,33 @@ difference_features:
 date_features:
   trending_date:
     - weekday
+
+# Filtering config
+max_time_to_trending: 60
+
+# Features config
+join_columns:
+  - video_id
+  - trending_date
+
+base_columns:
+  - views
+  - likes
+  - dislikes
+  - comment_count
+  - comments_disabled
+  - ratings_disabled
+  - video_error_or_removed
+  - likes_to_dislikes
+  - likes_to_views
+  - comments_to_views
+  - trending_date_weekday
+  - channel_title
+  - tags
+  - description
+  - category_id
+
+aggregate_windows:
+  - 7
+  - 30
+  - 180

@@ -33,11 +33,11 @@ def date_features(features_config: Dict[str, List[str]]) -> List[pl.Expr]:
 
 
 def basic_feature_engineering(
-    data: pl.DataFrame,
+    data: pl.LazyFrame,
     ratios_config: Dict[str, List[str]],
     diffs_config: Dict[str, List[str]],
     dates_config: Dict[str, List[str]],
-) -> pl.DataFrame:
+) -> pl.LazyFrame:
     ratio_expressions = ratio_features(ratios_config)
     date_diff_expressions = diff_features(diffs_config)
     date_expressions = date_features(dates_config)
@@ -48,7 +48,7 @@ def basic_feature_engineering(
     return data
 
 
-def build_channel_rolling(df: pl.DataFrame, date_col: str, period: int) -> pl.DataFrame:
+def build_channel_rolling(df: pl.LazyFrame, date_col: str, period: int) -> pl.LazyFrame:
     channel_aggs = (
         df.sort(date_col)
         .groupby_rolling(
@@ -75,8 +75,8 @@ def build_channel_rolling(df: pl.DataFrame, date_col: str, period: int) -> pl.Da
 
 
 def add_rolling_features(
-    df: pl.DataFrame, date_col: str, periods: List[int]
-) -> pl.DataFrame:
+    df: pl.LazyFrame, date_col: str, periods: List[int]
+) -> pl.LazyFrame:
     for period in periods:
         rolling_features = build_channel_rolling(df, date_col, period)
         df = df.join(rolling_features, on=["channel_title", "first_day_in_trending"])
@@ -84,7 +84,7 @@ def add_rolling_features(
     return df
 
 
-def build_period_features(df: pl.DataFrame, date_col: str, period: int) -> pl.DataFrame:
+def build_period_features(df: pl.LazyFrame, date_col: str, period: int) -> pl.LazyFrame:
     general_aggs = (
         df.sort(date_col)
         .groupby_dynamic(
@@ -117,8 +117,8 @@ def build_period_features(df: pl.DataFrame, date_col: str, period: int) -> pl.Da
 
 
 def add_period_features(
-    df: pl.DataFrame, date_col: str, periods: List[int]
-) -> pl.DataFrame:
+    df: pl.LazyFrame, date_col: str, periods: List[int]
+) -> pl.LazyFrame:
     for period in periods:
         rolling_features = build_period_features(df, date_col, period)
         df = df.join(rolling_features, on=["first_day_in_trending"])

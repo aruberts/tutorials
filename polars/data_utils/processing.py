@@ -33,10 +33,10 @@ def map_dict_columns(
 
 
 def clean_data(
-    df: pl.DataFrame,
+    df: pl.LazyFrame,
     date_cols_config: Dict[str, str],
     mapping_cols_config: Dict[str, Dict[str | int, str | int]],
-) -> pl.DataFrame:
+) -> pl.LazyFrame:
     parse_dates_expressions = parse_dates(date_cols=date_cols_config)
     mapping_expressions = map_dict_columns(mapping_cols_config)
 

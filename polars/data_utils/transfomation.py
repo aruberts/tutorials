@@ -1,15 +1,15 @@
-from typing import List
+from typing import Dict, List
 
 import polars as pl
 
 
 def join_original_features(
-    main: pl.DataFrame,
-    original: pl.DataFrame,
+    main: pl.LazyFrame,
+    original: pl.LazyFrame,
     main_join_cols: List[str],
     original_join_cols: List[str],
     other_cols: List[str],
-) -> pl.DataFrame:
+) -> pl.LazyFrame:
     original_features = original.select(original_join_cols + other_cols).unique(
         original_join_cols
     )  # unique ensures one row per video + date
@@ -24,11 +24,11 @@ def join_original_features(
 
 
 def create_target_df(
-    df: pl.DataFrame,
+    df: pl.LazyFrame,
     time_to_trending_thr: int,
     original_join_cols: List[str],
     other_cols: List[str],
-) -> pl.DataFrame:
+) -> pl.LazyFrame:
     # Create a DF with video ID per row and corresponding days to trending and days in trending (target)
     target = (
         df.groupby(["video_id"])
