@@ -19,6 +19,7 @@ categorical_features: list[str] = conf["categorical_features"]
 spark = SparkSession.builder.master("local[*]").appName("LocalTest").getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
 
+# Read in and do some basic processing
 df = (
     spark.read.option("delimiter", "|")
     .csv(conf["filepaths"], inferSchema=True, header=True)
@@ -75,18 +76,6 @@ df = df.withColumns(
             timestamp_col="dt",
             window_in_minutes=30,
         ),
-        # "dest_ip_count_last_min": generate_rolling_aggregate(
-        #     col="dest_ip", operation="count", timestamp_col="dt", window_in_minutes=1
-        # ),
-        # "dest_ip_count_last_30_mins": generate_rolling_aggregate(
-        #     col="dest_ip", operation="count", timestamp_col="dt", window_in_minutes=30
-        # ),
-        # "dest_port_count_last_min": generate_rolling_aggregate(
-        #     col="dest_port", operation="count", timestamp_col="dt", window_in_minutes=1
-        # ),
-        # "dest_port_count_last_30_mins": generate_rolling_aggregate(
-        #     col="dest_port", operation="count", timestamp_col="dt", window_in_minutes=30
-        # ),
         "source_ip_avg_pkts_last_min": generate_rolling_aggregate(
             col="orig_pkts",
             partition_by="source_ip",
@@ -118,7 +107,6 @@ df = df.withColumns(
     }
 )
 
-# df.write.parquet("tmp.pq")
 if conf["random_split"]:
     df_train, df_test = df.randomSplit(weights=[0.8, 0.2], seed=200)
 else:
