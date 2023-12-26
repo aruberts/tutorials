@@ -6,9 +6,9 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from pyspark.ml.feature import StringIndexer, VectorAssembler
 from pyspark.sql import SparkSession
 
-from utils.cleaning import get_static, remove_rare_categories
-from utils.feature_engineering import generate_rolling_aggregate
-from utils.ml_prep import ip_based_split
+from cleaning import get_static, remove_rare_categories
+from feature_engineering import generate_rolling_aggregate
+from ml_prep import ip_based_split
 
 with open("config.yaml", "r") as file:
     conf = yaml.safe_load(file)
@@ -16,7 +16,7 @@ with open("config.yaml", "r") as file:
 numerical_features: list[str] = conf["numerical_features"]
 categorical_features: list[str] = conf["categorical_features"]
 
-spark = SparkSession.builder.master("local[*]").appName("LocalTest").getOrCreate()
+spark = SparkSession.builder.appName("LocalTest").getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
 
 # Read in and do some basic processing

@@ -1,0 +1,8 @@
+name: iot
+dependencies:
+  - python=3.10
+  - pyyaml=6.0.1
+  - mmh3==4.0.1
+  - numpy
+  - pandas
+  - pyspark
