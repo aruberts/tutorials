@@ -1,5 +1,6 @@
 import pyspark.sql.functions as F
 import yaml
+from hyperopt import hp
 from pyspark.ml import Pipeline
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
@@ -9,8 +10,9 @@ from pyspark.sql import SparkSession
 from cleaning import get_static, remove_rare_categories
 from feature_engineering import generate_rolling_aggregate
 from ml_prep import ip_based_split
+from tuning import tune_rf
 
-with open("config.yaml", "r") as file:
+with open("gcs_config.yaml", "r") as file:
     conf = yaml.safe_load(file)
 
 numerical_features: list[str] = conf["numerical_features"]
@@ -39,7 +41,7 @@ df = (
     )
     .withColumns({n: F.col(n).cast("double") for n in numerical_features})
     .replace("-", None)
-    .fillna(conf["fill_vals"])
+    .fillna(conf["na_fill_vals"])
 )
 
 # Find and drop static columns
@@ -112,6 +114,16 @@ if conf["random_split"]:
 else:
     df_train, df_test = ip_based_split(df, "source_ip", 0.2)
 
+
+df_train, df_val = df_train.randomSplit(weights=[0.8, 0.2], seed=200)
+
+search_space = {
+    "numTrees": hp.uniformint("numTrees", 10, 500),
+    "maxDepth": hp.uniformint("maxDepth", 2, 10),
+}
+
+roc = BinaryClassificationEvaluator(labelCol="is_bad", metricName="areaUnderROC")
+
 ind = StringIndexer(
     inputCols=categorical_features,
     outputCols=categorical_features_indexed,
@@ -120,18 +132,33 @@ ind = StringIndexer(
 va = VectorAssembler(
     inputCols=input_features, outputCol="features", handleInvalid="skip"
 )
-rf = RandomForestClassifier(featuresCol="features", labelCol="is_bad", numTrees=100)
 
-pipeline = Pipeline(stages=[ind, va, rf])
+if conf["tuning_rounds"] > 0:
+    print("Tuning the model for {conf['tuning_rounds']} round")
+    best_params = tune_rf(
+        train=df_train,
+        val=df_val,
+        string_indexer=ind,
+        vector_assembler=va,
+        evaluator=roc,
+        param_grid=search_space,
+        tuning_rounds=conf["tuning_rounds"],
+    )
+else:
+    print("Skipping the tuning...")
+    best_params = {"numTrees": 10, "maxDepth": 4}
 
-pipeline = pipeline.fit(df_train)
-test_preds = pipeline.transform(df_test)
+best_rf = RandomForestClassifier(
+    featuresCol="features",
+    labelCol="is_bad",
+    numTrees=best_params["numTrees"],
+    maxDepth=best_params["maxDepth"],
+)
 
+best_pipeline = Pipeline(stages=[ind, va, best_rf])
+best_pipeline = best_pipeline.fit(df_train)
+test_preds = best_pipeline.transform(df_test)
 
-roc = BinaryClassificationEvaluator(labelCol="is_bad", metricName="areaUnderROC")
-print("ROC AUC", roc.evaluate(test_preds))
-
-pr = BinaryClassificationEvaluator(labelCol="is_bad", metricName="areaUnderPR")
-print("PR AUC", pr.evaluate(test_preds))
-
-pipeline.save("rf_pipeline")
+score = roc.evaluate(test_preds)
+print("ROC AUC", score)
+best_pipeline.save(conf["model_output_path"])
