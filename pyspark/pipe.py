@@ -12,6 +12,7 @@ from feature_engineering import generate_rolling_aggregate
 from ml_prep import ip_based_split
 from tuning import tune_rf
 
+# Read and set configs
 with open("gcs_config.yaml", "r") as file:
     conf = yaml.safe_load(file)
 
@@ -114,16 +115,7 @@ if conf["random_split"]:
 else:
     df_train, df_test = ip_based_split(df, "source_ip", 0.2)
 
-
-df_train, df_val = df_train.randomSplit(weights=[0.8, 0.2], seed=200)
-
-search_space = {
-    "numTrees": hp.uniformint("numTrees", 10, 500),
-    "maxDepth": hp.uniformint("maxDepth", 2, 10),
-}
-
 roc = BinaryClassificationEvaluator(labelCol="is_bad", metricName="areaUnderROC")
-
 ind = StringIndexer(
     inputCols=categorical_features,
     outputCols=categorical_features_indexed,
@@ -134,6 +126,11 @@ va = VectorAssembler(
 )
 
 if conf["tuning_rounds"] > 0:
+    df_train, df_val = df_train.randomSplit(weights=[0.8, 0.2], seed=200)
+    search_space = {
+        "numTrees": hp.uniformint("numTrees", 10, 500),
+        "maxDepth": hp.uniformint("maxDepth", 2, 10),
+    }
     print("Tuning the model for {conf['tuning_rounds']} round")
     best_params = tune_rf(
         train=df_train,

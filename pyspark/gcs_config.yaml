@@ -7,8 +7,8 @@ categorical_features:
 filepaths:
   - gs://iot-data-demo/CTU-IoT-Malware-Capture-1-1conn.log.labeled.csv
   - gs://iot-data-demo/CTU-IoT-Malware-Capture-3-1conn.log.labeled.csv
-  - ./iot_malware/CTU-IoT-Malware-Capture-20-1conn.log.labeled.csv
-  - ./iot_malware/CTU-IoT-Malware-Capture-21-1conn.log.labeled.csv
+  - gs://iot-data-demo/CTU-IoT-Malware-Capture-20-1conn.log.labeled.csv
+  - gs://iot-data-demo/CTU-IoT-Malware-Capture-21-1conn.log.labeled.csv
 model_output_path: gs://iot-data-demo/best_pipeline
 na_fill_vals:
   conn_state: missing
@@ -31,7 +31,7 @@ numerical_features:
   - orig_ip_bytes
   - resp_pkts
   - resp_ip_bytes
-random_split: true
+random_split: false
 tuning_rounds: 5
   # - ./iot_malware/CTU-IoT-Malware-Capture-34-1conn.log.labeled.csv
   # - ./iot_malware/CTU-IoT-Malware-Capture-35-1conn.log.labeled.csv
