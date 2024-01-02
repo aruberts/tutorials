@@ -131,7 +131,7 @@ if conf["tuning_rounds"] > 0:
         "numTrees": hp.uniformint("numTrees", 10, 500),
         "maxDepth": hp.uniformint("maxDepth", 2, 10),
     }
-    print("Tuning the model for {conf['tuning_rounds']} round")
+    print(f"Tuning the model for {conf['tuning_rounds']} rounds")
     best_params = tune_rf(
         train=df_train,
         val=df_val,
