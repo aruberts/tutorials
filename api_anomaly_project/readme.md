@@ -1,5 +1,8 @@
 # API Security: Anomaly Detection App
 
+> [!WARNING]
+> All the metrics, plots, and insights are made up and taken from the internet
+
 ![network header](assets/header.png)
 
 ## Dataset
@@ -57,6 +60,13 @@ Models were compared between each other using ROC AUC since we're dealing with b
 ![ROC and PR curves](assets/roc_pr_curves.png)
 
 LightGBM has outperformed XGBoost by *X%* in terms of ROC AUC. From the PR AUC curves, we can also see that it can give use gigher level of recall with the same precision at most of the thresholds, so this model is selected for deployment.
+
+### Model Explainability
+
+![Shap](assets/shap.png)
+
+The selected model has a well balanced feature improtance distribution, with top 3 features being *X, Y, and ~*. The directions of SHAP values are intuitive, since we expect that anomalies have larger rate of *X* and *Y* and smaller number of *Z*
+Notably, the engineered features are also considered to be important (4th, 5th and 7th place), which means that the feature engineering effort was successful.
 
 ## Business Metrics
 
