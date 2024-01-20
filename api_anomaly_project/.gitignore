@@ -11,8 +11,8 @@ tests/.cache/v/cache/lastfailed
 .DS_Store
 
 # datasets
-.csv
-.json
+*.csv
+*.json
 
 ## Python Section - See https://github.com/github/gitignore/blob/master/Python.gitignore
 ##

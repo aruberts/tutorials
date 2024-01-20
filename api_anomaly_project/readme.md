@@ -1,5 +1,5 @@
 # API Security: Anomaly Detection App
-![Alt text](assets/image-1.png)
+![Alt text](assets/header.png)
 
 ## Dataset
 The dataset for this project can be found on [Kaggle](https://www.kaggle.com/datasets/tangodelta/api-access-behaviour-anomaly-dataset/data) (licensed under GPL-2).
