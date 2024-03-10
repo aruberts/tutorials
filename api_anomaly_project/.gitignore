@@ -9,6 +9,8 @@ dst-env/
 tests/.cache/v/cache/lastfailed
 .vscode/settings.json
 .DS_Store
+*.db
+mlruns
 
 # datasets
 *.csv
